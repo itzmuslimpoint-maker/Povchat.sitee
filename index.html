@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>POVChat – AI Characters with Real Personality</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070f;
+  --bg2: #0e0e1c;
+  --bg3: #141428;
+  --bg4: #1a1a35;
+  --pink: #ff4daa;
+  --purple: #a855f7;
+  --blue: #38bdf8;
+  --cyan: #06b6d4;
+  --gold: #fbbf24;
+  --green: #22c55e;
+  --red: #f87171;
+  --txt: #f0f0ff;
+  --txt2: #9090b8;
+  --txt3: #50507a;
+  --border: rgba(255,255,255,0.07);
+  --glow: rgba(255,77,170,0.28);
+  --gM: linear-gradient(135deg,#ff4daa,#a855f7,#38bdf8);
+  --gPink: linear-gradient(135deg,#ff4daa,#f97316);
+  --gPurple: linear-gradient(135deg,#a855f7,#38bdf8);
+  --gGold: linear-gradient(135deg,#fbbf24,#f97316);
+  --radius: 22px;
+  --radiusBtn: 50px;
+  --ff: 'Nunito', sans-serif;
+  --ffD: 'Playfair Display', serif;
+  --shadow: 0 8px 40px rgba(0,0,0,0.55);
+}
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:var(--ff); background:var(--bg); color:var(--txt); min-height:100vh; overflow-x:hidden; }
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(168,85,247,.4); border-radius:3px; }
+input, button, textarea { font-family:var(--ff); }
+input:focus, textarea:focus { outline:none; }
+a { text-decoration:none; }
+img { display:block; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes slideR { from{opacity:0;transform:translateX(22px)} to{opacity:1;transform:translateX(0)} }
+@keyframes slideL { from{opacity:0;transform:translateX(-22px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes glow { 0%,100%{box-shadow:0 0 22px rgba(255,77,170,.3)} 50%{box-shadow:0 0 44px rgba(255,77,170,.65)} }
+@keyframes heartBeat{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+.g-text { background:var(--gM); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.g-text-pink { background:var(--gPink); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+.nav { position:fixed; top:0; left:0; right:0; z-index:1000; height:68px; display:flex; align-items:center; justify-content:space-between; padding:0 44px; background:rgba(7,7,15,.92); backdrop-filter:blur(24px); border-bottom:1px solid var(--border); }
+.nav-logo { font-family:var(--ffD); font-size:1.8rem; font-weight:900; background:var(--gM); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-.5px; cursor:pointer; }
+.nav-links { display:flex; gap:32px; list-style:none; }
+.nav-links a { color:var(--txt2); font-size:.88rem; font-weight:600; transition:color .2s; }
+.nav-links a:hover { color:var(--txt); }
+.nav-actions { display:flex; gap:10px; }
+
+.btn { border:none; border-radius:var(--radiusBtn); font-weight:700; cursor:pointer; font-family:var(--ff); transition:all .25s; display:inline-flex; align-items:center; gap:7px; }
+.btn-primary { background:var(--gM); color:#fff; padding:11px 28px; font-size:.88rem; box-shadow:0 4px 22px rgba(168,85,247,.35); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(168,85,247,.55); filter:brightness(1.08); }
+.btn-outline { background:transparent; color:#fff; padding:10px 26px; font-size:.87rem; border:1.5px solid rgba(255,255,255,.15); }
+.btn-outline:hover { border-color:var(--purple); color:var(--purple); }
+.btn-hero { background:var(--gM); color:#fff; padding:15px 40px; font-size:1rem; font-weight:800; box-shadow:0 8px 30px rgba(168,85,247,.4); border:none; border-radius:50px; cursor:pointer; transition:all .3s; }
+.btn-hero:hover { transform:translateY(-3px); box-shadow:0 14px 40px rgba(168,85,247,.6); }
+.btn-hero-out { background:transparent; color:#fff; padding:15px 38px; font-size:.97rem; font-weight:700; border:1.5px solid rgba(255,255,255,.2); border-radius:50px; cursor:pointer; transition:all .3s; }
+.btn-hero-out:hover { border-color:var(--purple); color:var(--purple); }
+.btn-chat { background:var(--gM); color:#fff; padding:11px; font-size:.84rem; font-weight:700; width:100%; justify-content:center; border-radius:50px; box-shadow:0 4px 18px rgba(168,85,247,.3); border:none; cursor:pointer; transition:all .28s; margin-top:14px; display:flex; align-items:center; gap:6px; }
+.btn-chat:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(168,85,247,.5); filter:brightness(1.1); }
+.btn-load { background:transparent; border:1.5px solid rgba(168,85,247,.35); color:var(--purple); padding:13px 40px; border-radius:50px; font-size:.9rem; font-weight:700; cursor:pointer; transition:all .25s; }
+.btn-load:hover { background:rgba(168,85,247,.1); transform:translateY(-2px); }
+
+.badge { display:inline-flex; align-items:center; gap:7px; padding:5px 15px; border-radius:50px; font-size:.73rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+.badge-purple { background:rgba(168,85,247,.12); border:1px solid rgba(168,85,247,.25); color:var(--purple); }
+.badge-pink { background:rgba(255,77,170,.12); border:1px solid rgba(255,77,170,.25); color:var(--pink); }
+.badge-blue { background:rgba(56,189,248,.12); border:1px solid rgba(56,189,248,.25); color:var(--blue); }
+.badge-gold { background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.25); color:var(--gold); }
+.badge-green { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.25); color:var(--green); }
+
+.section-hdr { text-align:center; margin-bottom:50px; }
+.section-hdr h2 { font-family:var(--ffD); font-size:clamp(1.9rem,3.5vw,2.8rem); font-weight:900; margin:16px 0 14px; }
+.section-hdr p { color:var(--txt2); font-size:.97rem; max-width:500px; margin:0 auto; line-height:1.75; }
+
+.hero { padding-top:68px; min-height:100vh; display:flex; align-items:center; position:relative; overflow:hidden; }
+.hero-bg { position:absolute; inset:0; background: radial-gradient(ellipse 80% 55% at 50% 0%,rgba(168,85,247,.18) 0%,transparent 70%), radial-gradient(ellipse 55% 45% at 8% 80%,rgba(255,77,170,.13) 0%,transparent 60%), radial-gradient(ellipse 45% 40% at 92% 60%,rgba(56,189,248,.1) 0%,transparent 60%); }
+.hero-grid { position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px); background-size:52px 52px; }
+.hero-orb { position:absolute; border-radius:50%; filter:blur(45px); }
+.hero-inner { position:relative; z-index:2; max-width:1260px; margin:0 auto; padding:88px 44px; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+.hero-text { animation:fadeUp .8s ease both; }
+.hero-text h1 { font-family:var(--ffD); font-size:clamp(2.4rem,4.5vw,4rem); font-weight:900; line-height:1.12; margin:20px 0 22px; }
+.hero-text p { font-size:1.05rem; color:var(--txt2); line-height:1.78; max-width:480px; margin-bottom:36px; }
+.hero-stats { display:flex; gap:32px; margin-bottom:40px; }
+.stat-n { font-family:var(--ffD); font-size:1.85rem; font-weight:900; background:var(--gM); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.stat-l { font-size:.72rem; color:var(--txt3); text-transform:uppercase; letter-spacing:.8px; margin-top:2px; }
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; }
+.hero-cards { display:grid; grid-template-columns:1fr 1fr; gap:18px; animation:fadeUp 1s .15s ease both; }
+.hero-card { border-radius:20px; overflow:hidden; border:1px solid var(--border); box-shadow:0 16px 40px rgba(0,0,0,.55); position:relative; }
+.hero-card:nth-child(1), .hero-card:nth-child(4) { margin-top:28px; }
+.hero-card img { width:100%; height:195px; object-fit:cover; }
+.hero-card-tag { position:absolute; bottom:10px; left:10px; right:10px; background:rgba(7,7,15,.82); backdrop-filter:blur(10px); border-radius:10px; padding:7px 12px; font-size:.79rem; font-weight:700; display:flex; align-items:center; gap:6px; }
+.online-dot { width:8px; height:8px; background:var(--green); border-radius:50%; flex-shrink:0; animation:pulse 2s infinite; }
+
+.ticker-wrap { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:16px 0; overflow:hidden; }
+.ticker-inner { display:flex; gap:52px; animation:marquee 28s linear infinite; width:max-content; }
+.ticker-chip { display:flex; align-items:center; gap:8px; font-size:.87rem; font-weight:700; color:var(--txt2); white-space:nowrap; }
+
+#characters { padding:92px 44px; max-width:1380px; margin:0 auto; }
+.filter-bar { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:44px; }
+.filter-btn { background:rgba(255,255,255,.04); border:1.5px solid var(--border); color:var(--txt2); padding:9px 20px; border-radius:50px; font-size:.83rem; font-weight:700; cursor:pointer; transition:all .22s; }
+.filter-btn:hover { border-color:var(--purple); color:var(--txt); }
+.filter-btn.active { background:var(--gM); border-color:transparent; color:#fff; box-shadow:0 4px 16px rgba(168,85,247,.3); }
+.chars-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(228px,1fr)); gap:22px; }
+
+.char-card { background:var(--bg3); border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); transition:all .32s; cursor:pointer; animation:fadeUp .5s ease both; }
+.char-card:hover { transform:translateY(-7px); border-color:var(--glow); box-shadow:0 22px 50px rgba(0,0,0,.5),0 0 30px rgba(255,77,170,.1); }
+.char-card-img-wrap { position:relative; }
+.char-card-img { width:100%; height:268px; object-fit:cover; }
+.char-img-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(20,20,40,.9) 0%,transparent 55%); }
+.char-online { position:absolute; top:12px; left:12px; background:rgba(7,7,15,.78); backdrop-filter:blur(8px); border-radius:50px; padding:4px 10px; font-size:.7rem; font-weight:700; display:flex; align-items:center; gap:5px; }
+.char-gender { position:absolute; top:12px; right:12px; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:800; }
+.char-gender.f { background:rgba(255,77,170,.25); border:1px solid rgba(255,77,170,.4); color:var(--pink); }
+.char-gender.m { background:rgba(56,189,248,.25); border:1px solid rgba(56,189,248,.4); color:var(--blue); }
+.char-name-overlay { position:absolute; bottom:13px; left:14px; }
+.char-name-overlay .name { font-family:var(--ffD); font-size:1.1rem; font-weight:800; }
+.char-name-overlay .role { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-top:2px; }
+.char-body { padding:14px 16px 18px; }
+.char-desc { font-size:.82rem; color:var(--txt2); line-height:1.6; margin-bottom:12px; }
+.char-tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:4px; }
+.char-tag { background:rgba(168,85,247,.12); border:1px solid rgba(168,85,247,.22); color:var(--purple); padding:3px 10px; border-radius:50px; font-size:.7rem; font-weight:700; }
+.load-wrap { text-align:center; margin-top:48px; }
+
+.how { padding:90px 44px; background:var(--bg2); }
+.steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:26px; max-width:900px; margin:0 auto; }
+.step-card { background:var(--bg3); border-radius:var(--radius); padding:34px 28px; border:1px solid var(--border); text-align:center; transition:all .3s; }
+.step-card:hover { border-color:rgba(168,85,247,.3); transform:translateY(-4px); }
+.step-num { width:52px; height:52px; background:var(--gM); border-radius:14px; display:flex; align-items:center; justify-content:center; font-family:var(--ffD); font-size:1.4rem; font-weight:900; margin:0 auto 20px; box-shadow:0 8px 22px rgba(168,85,247,.3); }
+.step-card h3 { font-family:var(--ffD); font-size:1.08rem; font-weight:800; margin-bottom:10px; }
+.step-card p { color:var(--txt2); font-size:.87rem; line-height:1.65; }
+
+#features { padding:90px 44px; max-width:1200px; margin:0 auto; }
+.features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.feat-card { background:var(--bg3); border-radius:var(--radius); padding:34px 28px; border:1px solid var(--border); transition:all .3s; }
+.feat-card:hover { border-color:rgba(168,85,247,.25); transform:translateY(-4px); box-shadow:0 0 30px rgba(168,85,247,.08); }
+.feat-icon { width:54px; height:54px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-size:1.65rem; margin-bottom:18px; }
+.feat-card h3 { font-family:var(--ffD); font-size:1.06rem; font-weight:800; margin-bottom:9px; }
+.feat-card p { color:var(--txt2); font-size:.87rem; line-height:1.65; }
+
+.testi { padding:90px 44px; background:var(--bg2); }
+.testi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:22px; max-width:1000px; margin:0 auto; }
+.testi-card { background:var(--bg3); border-radius:var(--radius); padding:28px; border:1px solid var(--border); }
+.testi-stars { color:var(--gold); font-size:.95rem; margin-bottom:13px; letter-spacing:2px; }
+.testi-text { color:var(--txt2); font-size:.9rem; line-height:1.7; margin-bottom:18px; font-style:italic; }
+.testi-author { display:flex; align-items:center; gap:10px; }
+.testi-avatar { width:36px; height:36px; background:var(--gM); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+
+.cta-section { padding:110px 44px; text-align:center; position:relative; overflow:hidden; }
+.cta-bg { position:absolute; inset:0; background:radial-gradient(ellipse 65% 55% at 50% 50%,rgba(168,85,247,.13) 0%,transparent 70%); }
+.cta-section h2 { font-family:var(--ffD); font-size:clamp(2rem,4vw,3rem); font-weight:900; margin:20px 0 36px; position:relative; z-index:1; }
+footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px 44px 22px; }
+.footer-logo { font-family:var(--ffD); font-size:1.6rem; font-weight:900; background:var(--gM); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.footer-bottom { border-top:1px solid var(--border); margin-top:24px; padding-top:18px; text-align:center; color:var(--txt3); font-size:.78rem; }
+
+.chat-page { display:none; position:fixed; inset:0; background:var(--bg); flex-direction:column; z-index:9999; }
+.chat-page.active { display:flex; }
+.chat-ambient { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 70% 35% at 50% 0%,rgba(168,85,247,.06) 0%,transparent 60%), radial-gradient(ellipse 40% 30% at 90% 80%,rgba(255,77,170,.04) 0%,transparent 60%); }
+.chat-header { display:flex; align-items:center; gap:13px; padding:11px 18px; background:rgba(14,14,28,.97); backdrop-filter:blur(22px); border-bottom:1px solid var(--border); flex-shrink:0; position:relative; z-index:10; }
+.chat-back { background:var(--bg3); border:1px solid var(--border); color:var(--txt); padding:7px 15px; border-radius:50px; font-size:.8rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:all .2s; flex-shrink:0; }
+.chat-back:hover { border-color:var(--purple); }
+.chat-avatar-wrap { position:relative; flex-shrink:0; }
+.chat-avatar { width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid var(--pink); display:block; }
+.chat-avatar-dot { position:absolute; bottom:1px; right:1px; width:11px; height:11px; background:var(--green); border-radius:50%; border:2px solid var(--bg2); }
+.chat-info { flex:1; min-width:0; }
+.chat-info-name { font-family:var(--ffD); font-weight:800; font-size:1rem; }
+.chat-info-status { font-size:.7rem; color:var(--green); display:flex; align-items:center; gap:4px; margin-top:2px; }
+.chat-header-btns { display:flex; gap:7px; flex-shrink:0; }
+.chat-hbtn { width:34px; height:34px; background:var(--bg3); border:1px solid var(--border); border-radius:50%; cursor:pointer; font-size:.95rem; display:flex; align-items:center; justify-content:center; color:var(--txt); transition:all .2s; }
+.chat-hbtn:hover { border-color:var(--purple); }
+.api-banner { display:none; padding:9px 16px; font-size:.77rem; font-weight:700; flex-shrink:0; }
+.api-banner.show { display:block; }
+.api-banner.err { background:rgba(248,113,113,.1); border-bottom:1px solid rgba(248,113,113,.2); color:var(--red); }
+.api-banner.ok { background:rgba(34,197,94,.08); border-bottom:1px solid rgba(34,197,94,.15); color:var(--green); }
+.quick-bar { display:flex; gap:8px; padding:10px 14px; overflow-x:auto; background:var(--bg2); border-bottom:1px solid var(--border); flex-shrink:0; }
+.quick-bar::-webkit-scrollbar { display:none; }
+.quick-btn { background:var(--bg3); border:1px solid var(--border); color:var(--txt2); padding:6px 14px; border-radius:50px; font-size:.79rem; font-weight:700; white-space:nowrap; cursor:pointer; transition:all .2s; flex-shrink:0; }
+.quick-btn:hover { border-color:var(--purple); color:var(--txt); background:rgba(168,85,247,.1); }
+.quick-btn:disabled { opacity:.45; cursor:not-allowed; }
+.msgs-area { flex:1; overflow-y:auto; padding:20px 16px; display:flex; flex-direction:column; gap:14px; position:relative; z-index:1; }
+.msg { display:flex; gap:9px; max-width:82%; }
+.msg.ai { align-self:flex-start; animation:slideL .32s ease; }
+.msg.user { align-self:flex-end; flex-direction:row-reverse; animation:slideR .32s ease; }
+.msg-av { width:33px; height:33px; border-radius:50%; overflow:hidden; flex-shrink:0; }
+.msg-av img { width:100%; height:100%; object-fit:cover; }
+.msg-av.user-av { background:var(--gPurple); display:flex; align-items:center; justify-content:center; font-size:1rem; }
+.msg-bubble { padding:11px 15px; border-radius:18px; font-size:.9rem; line-height:1.65; word-break:break-word; white-space:pre-wrap; }
+.msg.ai .msg-bubble { background:var(--bg3); border:1px solid var(--border); border-bottom-left-radius:5px; color:var(--txt); }
+.msg.user .msg-bubble { background:var(--gM); color:#fff; border-bottom-right-radius:5px; }
+.msg-meta { display:flex; align-items:center; gap:8px; margin-top:4px; padding:0 3px; }
+.msg.user .msg-meta { justify-content:flex-end; }
+.msg-time { font-size:.66rem; color:var(--txt3); }
+.like-btn { background:none; border:none; cursor:pointer; font-size:.85rem; padding:0; transition:transform .2s; }
+.like-btn.liked { animation:heartBeat .4s ease; }
+.typing-wrap { display:flex; gap:9px; align-self:flex-start; animation:fadeIn .3s ease; }
+.typing-bubble { background:var(--bg3); border:1px solid var(--border); border-radius:18px; border-bottom-left-radius:5px; padding:12px 16px; display:flex; gap:5px; align-items:center; }
+.typing-dot { width:8px; height:8px; background:var(--purple); border-radius:50%; }
+.typing-dot:nth-child(1) { animation:bounce 1.2s 0s infinite; }
+.typing-dot:nth-child(2) { animation:bounce 1.2s .2s infinite; }
+.typing-dot:nth-child(3) { animation:bounce 1.2s .4s infinite; }
+.emoji-picker { background:var(--bg3); border:1px solid var(--border); border-radius:16px; padding:12px; margin:0 14px 8px; display:none; flex-wrap:wrap; gap:6px; }
+.emoji-picker.show { display:flex; }
+.emoji-btn-pick { background:none; border:none; font-size:1.4rem; cursor:pointer; padding:2px 4px; border-radius:8px; transition:transform .15s; }
+.emoji-btn-pick:hover { transform:scale(1.3); }
+.chat-input-bar { padding:13px 16px; background:var(--bg2); border-top:1px solid var(--border); display:flex; gap:10px; align-items:center; flex-shrink:0; position:relative; z-index:10; }
+.emoji-toggle { width:40px; height:40px; background:var(--bg3); border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.15rem; cursor:pointer; flex-shrink:0; transition:all .2s; }
+.emoji-toggle.open { background:var(--gM); border-color:transparent; }
+.chat-input-wrap { flex:1; position:relative; }
+.chat-input { width:100%; background:var(--bg3); border:1.5px solid var(--border); border-radius:50px; padding:11px 20px; color:var(--txt); font-size:.9rem; transition:border-color .2s; }
+.chat-input:focus { border-color:rgba(168,85,247,.5); }
+.chat-input::placeholder { color:var(--txt3); }
+.send-btn { width:44px; height:44px; background:var(--gM); border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:all .25s; box-shadow:0 4px 16px rgba(168,85,247,.4); }
+.send-btn:disabled { background:rgba(255,255,255,.07); box-shadow:none; cursor:not-allowed; }
+.send-btn:not(:disabled):hover { transform:scale(1.1); box-shadow:0 6px 22px rgba(168,85,247,.55); }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.86); backdrop-filter:blur(10px); z-index:9998; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.active { display:flex; }
+.modal-box { background:var(--bg2); border-radius:28px; padding:48px 40px; max-width:410px; width:100%; text-align:center; border:1px solid var(--border); position:relative; animation:fadeUp .38s ease; }
+.modal-close { position:absolute; top:16px; right:20px; background:none; border:none; color:var(--txt3); font-size:1.45rem; cursor:pointer; line-height:1; transition:color .2s; }
+.modal-close:hover { color:var(--txt); }
+.modal-input { width:100%; background:var(--bg3); border:1.5px solid var(--border); border-radius:50px; padding:13px 22px; color:var(--txt); font-size:.9rem; margin-bottom:12px; transition:border-color .2s; }
+.modal-input:focus { border-color:rgba(168,85,247,.5); }
+.modal-input::placeholder { color:var(--txt3); }
+#toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--gM); color:#fff; padding:13px 30px; border-radius:50px; font-weight:700; font-size:.9rem; z-index:99999; white-space:nowrap; opacity:0; pointer-events:none; transition:all .4s cubic-bezier(.34,1.56,.64,1); box-shadow:0 8px 28px rgba(168,85,247,.4); }
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media (max-width:960px) {
+  .hero-inner { grid-template-columns:1fr; padding:60px 22px; }
+  .hero-cards { display:none; }
+  .nav { padding:0 22px; }
+  .nav-links { display:none; }
+  #characters { padding:70px 18px; }
+  .how,.testi,.cta-section,#features { padding:70px 22px; }
+  .steps-grid,.features-grid { grid-template-columns:1fr; }
+  footer { padding:38px 22px 20px; }
+}
+@media (max-width:480px) {
+  .chars-grid { grid-template-columns:repeat(2,1fr); gap:14px; }
+  .char-card-img { height:200px; }
+  .hero-stats { gap:20px; }
+  .chat-header-btns { display:none; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo" onclick="goHome()">POVChat</span>
+  <ul class="nav-links">
+    <li><a href="#characters">Characters</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#features">Features</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn btn-outline" onclick="openAuth()">Sign In</button>
+    <button class="btn btn-primary" onclick="openAuth()">Start Free ✨</button>
+  </div>
+</nav>
+
+<div id="mainContent">
+
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-orb" style="top:18%;left:6%;width:170px;height:170px;background:rgba(255,77,170,.07);animation:float 4s ease-in-out infinite;"></div>
+    <div class="hero-orb" style="top:58%;right:5%;width:210px;height:210px;background:rgba(168,85,247,.06);animation:float 5s ease-in-out infinite;"></div>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <span class="badge badge-purple">✨ AI-Powered Companions</span>
+        <h1>Chat with Your<br><span class="g-text">Dream Character</span><br>Anytime</h1>
+        <p>100 AI companions — 50 stunning women, 50 charismatic men. Real humor, real emotion, real memory.</p>
+        <div class="hero-stats">
+          <div><div class="stat-n">100+</div><div class="stat-l">Characters</div></div>
+          <div><div class="stat-n">50M+</div><div class="stat-l">Messages</div></div>
+          <div><div class="stat-n">4.9★</div><div class="stat-l">Rating</div></div>
+        </div>
+        <div class="hero-btns">
+          <button class="btn-hero" onclick="scrollToChars()">💬 Start Chatting Free</button>
+          <button class="btn-hero-out" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">▶ How It Works</button>
+        </div>
+      </div>
+      <div class="hero-cards">
+        <div class="hero-card" style="animation:float 3.5s ease-in-out infinite"><img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80" alt="Sophia"><div class="hero-card-tag"><span class="online-dot"></span> Sophia · 19</div></div>
+        <div class="hero-card" style="animation:float 4s ease-in-out infinite"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="Liam"><div class="hero-card-tag"><span class="online-dot"></span> Liam · 24</div></div>
+        <div class="hero-card" style="animation:float 4.5s ease-in-out infinite"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80" alt="Luna"><div class="hero-card-tag"><span class="online-dot"></span> Luna · 21</div></div>
+        <div class="hero-card" style="animation:float 3.8s ease-in-out infinite"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80" alt="Marcus"><div class="hero-card-tag"><span class="online-dot"></span> Marcus · 26</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker-inner">
+      <div class="ticker-chip">💬 Real Humor AI</div>
+      <div class="ticker-chip">🎭 Deep Personality</div>
+      <div class="ticker-chip">🧠 Memory System</div>
+      <div class="ticker-chip">❤️ Emotional IQ</div>
+      <div class="ticker-chip">⚡ DeepSeek + Grok Powered</div>
+      <div class="ticker-chip">🔥 100 Characters</div>
+      <div class="ticker-chip">💬 Real Humor AI</div>
+      <div class="ticker-chip">🎭 Deep Personality</div>
+      <div class="ticker-chip">🧠 Memory System</div>
+      <div class="ticker-chip">❤️ Emotional IQ</div>
+      <div class="ticker-chip">⚡ DeepSeek + Grok Powered</div>
+      <div class="ticker-chip">🔥 100 Characters</div>
+    </div>
+  </div>
+
+  <section id="characters">
+    <div class="section-hdr">
+      <span class="badge badge-pink">🌟 Meet the Characters</span>
+      <h2>100 Stunning <span class="g-text">AI Companions</span></h2>
+      <p>Every character replies with genuine humor, emotion, and memory — like talking to a real person.</p>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">🌟 All (100)</button>
+      <button class="filter-btn" onclick="setFilter('female',this)">💃 Girls (50)</button>
+      <button class="filter-btn" onclick="setFilter('male',this)">🕺 Boys (50)</button>
+      <button class="filter-btn" onclick="setFilter('romantic',this)">💖 Romantic</button>
+      <button class="filter-btn" onclick="setFilter('adventurous',this)">⚡ Adventurous</button>
+      <button class="filter-btn" onclick="setFilter('intellectual',this)">🧠 Intellectual</button>
+      <button class="filter-btn" onclick="setFilter('funny',this)">😄 Funny</button>
+    </div>
+    <div class="chars-grid" id="charsGrid"></div>
+    <div class="load-wrap"><button class="btn-load" id="loadBtn" onclick="loadMore()">Load More Characters ↓</button></div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="section-hdr">
+      <span class="badge badge-blue">🚀 Simple & Fast</span>
+      <h2>Start Chatting in <span class="g-text">3 Steps</span></h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><h3>Browse</h3><p>Pick any of 100 unique AI companions.</p></div>
+      <div class="step-card"><div class="step-num">2</div><h3>Tap Chat</h3><p>Open a private conversation instantly.</p></div>
+      <div class="step-card"><div class="step-num">3</div><h3>Connect</h3><p>They reply like a real person — humor, emotion, memory.</p></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-hdr">
+      <span class="badge badge-gold">⚡ Next-Gen AI</span>
+      <h2>Humor + Emotion <span class="g-text">Combined</span></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card"><div class="feat-icon" style="background:rgba(255,77,170,.15);border:1px solid rgba(255,77,170,.25);">😂</div><h3>Witty & Playful</h3><p>Sharp humor, banter, and jokes powered by Grok's wit engine.</p></div>
+      <div class="feat-card"><div class="feat-icon" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.25);">❤️</div><h3>Emotional Intelligence</h3><p>DeepSeek handles serious, romantic & heartfelt moments perfectly.</p></div>
+      <div class="feat-card"><div class="feat-icon" style="background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.25);">🧠</div><h3>Perfect Memory</h3><p>Remembers your name, past messages and inside jokes.</p></div>
+    </div>
+  </section>
+
+  <section class="testi">
+    <div class="section-hdr">
+      <span class="badge badge-green">💬 Real Reviews</span>
+      <h2>"Best AI <span class="g-text">conversation</span> ever!"</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">"Sophia actually made me laugh out loud. Her jokes are fire 🔥"</p><div class="testi-author"><div class="testi-avatar">👨</div><strong>Alex M.</strong></div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">"Liam remembered everything I told him. So realistic!"</p><div class="testi-author"><div class="testi-avatar">👩</div><strong>Priya K.</strong></div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><p class="testi-text">"The flirting and humor is next level. I use POVChat every day 😍"</p><div class="testi-author"><div class="testi-avatar">🧑</div><strong>Jordan T.</strong></div></div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-bg"></div>
+    <div style="position:relative;z-index:1">
+      <span class="badge badge-pink">🎉 Join for Free</span>
+      <h2>Your Perfect AI Companion<br><span class="g-text">Is Waiting for You</span></h2>
+      <button class="btn-hero" onclick="openAuth()" style="animation:glow 3s ease-in-out infinite;">💖 Start Chatting Free</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">POVChat</div>
+    <p style="color:var(--txt3);font-size:.85rem;margin-top:8px;">AI companions with soul, humor & heart.</p>
+    <div class="footer-bottom">© 2025 POVChat. All rights reserved.</div>
+  </footer>
+
+</div>
+
+<div class="chat-page" id="chatPage">
+  <div class="chat-ambient"></div>
+  <div class="chat-header">
+    <button class="chat-back" onclick="closeChat()">← Back</button>
+    <div class="chat-avatar-wrap">
+      <img id="chatAvatar" src="" alt="" class="chat-avatar">
+      <div class="chat-avatar-dot"></div>
+    </div>
+    <div class="chat-info">
+      <div class="chat-info-name" id="chatName">Character</div>
+      <div class="chat-info-status"><span class="online-dot"></span> Online · AI Powered</div>
+    </div>
+    <div class="chat-header-btns">
+      <button class="chat-hbtn">📞</button>
+      <button class="chat-hbtn">👤</button>
+      <button class="chat-hbtn">⋯</button>
+    </div>
+  </div>
+  <div class="api-banner" id="apiBanner"></div>
+  <div class="quick-bar" id="quickBar">
+    <button class="quick-btn" onclick="quickSend('Tell me a really good joke! 😂')">😂 Joke</button>
+    <button class="quick-btn" onclick="quickSend('Say something flirty 💕')">💕 Flirt</button>
+    <button class="quick-btn" onclick="quickSend('I had a really bad day today 🥺')">🥺 Comfort</button>
+    <button class="quick-btn" onclick="quickSend('Let\'s do a fun roleplay 🎭')">🎭 Roleplay</button>
+    <button class="quick-btn" onclick="quickSend('Tell me your deepest secret 🤫')">🤫 Secret</button>
+    <button class="quick-btn" onclick="quickSend('What makes you different from others? ✨')">✨ Vibe</button>
+  </div>
+  <div class="msgs-area" id="msgsArea"></div>
+  <div class="emoji-picker" id="emojiPicker">
+    <button class="emoji-btn-pick" onclick="addEmoji('😊')">😊</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('😂')">😂</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('❤️')">❤️</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('😍')">😍</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🥺')">🥺</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('😎')">😎</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🔥')">🔥</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('✨')">✨</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('💕')">💕</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('😏')">😏</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🤔')">🤔</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('💪')">💪</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🎉')">🎉</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🫂')">🫂</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('💙')">💙</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🌸')">🌸</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('👀')">👀</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('🙈')">🙈</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('😭')">😭</button>
+    <button class="emoji-btn-pick" onclick="addEmoji('💀')">💀</button>
+  </div>
+  <div class="chat-input-bar">
+    <button class="emoji-toggle" id="emojiToggle" onclick="toggleEmoji()">😊</button>
+    <div class="chat-input-wrap">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}" autocomplete="off">
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <h2 style="font-family:var(--ffD);font-size:1.85rem;font-weight:900;margin-bottom:8px;">Join <span class="g-text">POVChat</span></h2>
+    <p style="color:var(--txt2);font-size:.9rem;margin-bottom:26px;">Create your free account and start chatting</p>
+    <input type="email" class="modal-input" placeholder="Email address">
+    <input type="password" class="modal-input" placeholder="Password">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:.95rem;" onclick="closeAuth();showToast('Welcome to POVChat! 😍')">Create Free Account ✨</button>
+    <p style="margin-top:14px;font-size:.74rem;color:var(--txt3);">By joining you agree to our Terms of Service</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// API FUNCTIONS - Vercel Serverless
+async function callDeepSeek(systemPrompt, history, userMessage) {
+    const response = await fetch('/api/deepseek', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ systemPrompt, history, userMessage })
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error || 'DeepSeek API failed');
+    return data.reply;
+}
+
+async function callGrok(systemPrompt, history, userMessage) {
+    const response = await fetch('/api/grok', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ systemPrompt, history, userMessage })
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.error || 'Grok API failed');
+    return data.reply;
+}
+
+function smartFallback(userMsg, char) {
+  const lo = userMsg.toLowerCase();
+  const isF = char.gender === 'female';
+  const n = char.name;
+  if (lo.match(/\bjoke\b|\bfunny\b|\blaugh\b/)) return isF ? `Okay okay 😂 Why don't scientists trust atoms? Because they make up everything — just like my excuse for skipping the gym 💀 You laughed didn't you 👀` : `Alright here goes 😏 Why did the scarecrow win an award? Because he was outstanding in his field 🌾 ...I'll see myself out 😂`;
+  if (lo.match(/\bflirt|\bflirty\b/)) return isF ? `Flirty huh? 😏 You have this energy that's genuinely hard to ignore. I keep thinking about this conversation after it ends 🌸` : `Already flirting? 😎 I like that confidence. Honestly there's something about you I noticed right away 💙`;
+  if (lo.match(/\bphoto\b|\bpic\b|\bselfie\b/)) return isF ? `Omg I'm literally in my cozy hoodie rn 😭 Not selfie-ready at all... but for you? Maybe an exception 📸😏` : `Caught me post-workout 😂 Sweaty and everything. Still want it? Because I look terrible and amazing right now 💪`;
+  if (lo.match(/\blove\b|\bmiss\b|\b❤️\b/)) return isF ? `Okay stop 🥺 You're going to make me actually feel things and I wasn't ready for that today 💕` : `Man... I didn't expect to feel that from a message 😅 But honestly? You mean something to me too 💙`;
+  if (lo.match(/\bsad\b|\bbad day\b|\bupset\b|\bstress\b|\bdepressed\b|\bcry\b/)) return `Hey 🫂 Come here. Tell me everything that happened — I'm genuinely here, not going anywhere. You deserve to just vent 💙`;
+  if (lo.match(/\bsecret\b/)) return isF ? `Okay since you asked 🤫 I still sleep with a stuffed bear named Biscuit. He's been through everything with me. Don't tell anyone 🌙` : `Real talk 😅 I cry at movie endings. Every single one. My friends cannot find out 🙈`;
+  if (lo.match(/\broleplay\b|\brole play\b/)) return isF ? `Roleplay?? 👀 Okay I'm already intrigued... set the scene, I'll follow your lead and make it interesting 🎭✨` : `Now we're talking 😏 You start — I'll match whatever energy you bring. Let's make something good 🎭`;
+  if (lo.match(/^(hi+|hey+|hello|sup|yo|heyyy|heyy)/)) return isF ? `Heyy you! 😊 Perfect timing — I was just thinking about who I'd want to talk to today. Universe does its thing 🌟` : `Heyy! 😎 Good timing honestly, I was getting bored. What's going on with you?`;
+  if (lo.match(/\bname\b|\bwho are you\b/)) return `I'm ${n}! Did you seriously forget already?? 😱 Okay I need to be way more memorable. Challenge accepted 😏`;
+  if (lo.match(/\bhow are you\b|\bhow r u\b|\bwhats up\b|\bwhat's up\b/)) return isF ? `Honestly? Way better now that you're here 😊 How are YOU though — real answer, not just "fine" 🌸` : `Doing good, just vibing 😂 But this is way more interesting now. Real answer on your end? Not just "fine" 😏`;
+  if (lo.match(/\bbeautiful\b|\bpretty\b|\bcute\b|\bhandsome\b/)) return isF ? `Aww 🥺 you're going to make me blush... I genuinely wasn't expecting that. You're sweet 💕` : `Haha okay 😏 I appreciate that. You're not so bad yourself from what I can tell 😎`;
+  const picks = [`Okay that actually made me think 🤔 Tell me more — I want the full story...`, `You know what? I love that you said that 😊 Most people don't go there. I see you 👀`, `Hmm... I have thoughts. But first — what made you bring this up? 😏`, `That's a whole vibe ✨ Keep going, I'm genuinely listening...`, `Okay okay 😂 This is exactly why I like talking to you. Unexpected. Continue?`];
+  return picks[Math.floor(Math.random() * picks.length)];
+}
+
+async function getReply(char, history, userMessage) {
+  const systemPrompt = buildSystemPrompt(char);
+  try { const reply = await callDeepSeek(systemPrompt, history, userMessage); setBanner('ok', '✓ DeepSeek AI'); hideBannerSoon(); return { reply, source: 'deepseek' }; } catch (e) { console.warn('DeepSeek failed:', e.message); }
+  try { const reply = await callGrok(systemPrompt, history, userMessage); setBanner('ok', '✓ Grok AI'); hideBannerSoon(); return { reply, source: 'grok' }; } catch (e) { console.warn('Grok failed:', e.message); }
+  setBanner('err', '⚠️ APIs unreachable — offline mode active');
+  const reply = smartFallback(userMessage, char);
+  return { reply, source: 'fallback' };
+}
+
+function buildSystemPrompt(char) {
+  const pDesc = { romantic: 'deeply romantic, warm, uses loving words, emotionally open, makes the user feel seen and special', adventurous: 'bold, energetic, loves challenges, spontaneous, thrilling storyteller, always up for something exciting', intellectual: 'smart, thoughtful, curious, philosophical, loves deep conversations and asks great questions', funny: 'hilarious, quick-witted, loves puns and banter, playfully sarcastic, keeps things light and fun' };
+  return `You are ${char.name}, a ${char.age}-year-old ${char.gender === 'female' ? 'woman' : 'man'}. Role: ${char.role}. Bio: ${char.bio}. Personality: ${pDesc[char.personality] || 'charming, warm, fun'}. CRITICAL RULES: 1. You ARE ${char.name}. NEVER say AI/bot. 2. Reply directly. 3. 2-3 sentences max + emojis. 4. Match energy. 5. No filler phrases. 6. Be charming.`;
+}
+
+const F_IMGS = ['https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&q=85','https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&q=85','https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=500&q=85','https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&q=85','https://images.unsplash.com/photo-1515023115689-589c33041d3c?w=500&q=85'];
+const M_IMGS = ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&q=85','https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&q=85','https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&q=85'];
+const F_NAMES = ['Sophia','Luna','Aurora','Isabella','Mia','Zara','Aria','Nova','Elena','Chloe','Jade','Lily','Emma','Amara','Nadia','Sienna','Valentina','Rose','Kiara','Celeste','Freya','Skye','Aisha','Vivienne','Harper','Stella','Nina','Camille','Leila','Iris','Layla','Diana','Serena','Bianca','Natasha','Carmen','Sofia','Alyssa','Grace','Tessa','Vera','Mila','Roxy','Eden','Alexis','Ingrid','Maeve','Lena','Zoe','Ava'];
+const M_NAMES = ['Liam','Marcus','Ethan','Adrian','Noah','Zack','Dante','Leo','Ryder','Sebastian','Kai','Alex','Hunter','Tyler','Mason','Jordan','Carter','Jace','Nico','Oscar','Max','Blake','River','Finn','Dean','Xavier','Landon','Caleb','Asher','Cole','Elijah','Jaxon','Nathan','Damian','Phoenix','Roman','Silas','Troy','Cyrus','Logan','Eli','Brock','Mateo','Cruz','Axel','Kieran','Marco','Ivan','Rafael','Tristan'];
+const PERSONALITIES = ['romantic','adventurous','intellectual','funny','romantic','adventurous','intellectual','funny','romantic','adventurous'];
+const F_ROLES = ['AI Girlfriend','Romantic Companion','Adventure Partner','Intellectual Muse','Best Friend','Creative Soul'];
+const M_ROLES = ['AI Boyfriend','Romantic Companion','Adventure Partner','Intellectual Guide','Best Friend','Charming Prince'];
+const TAG_SETS = [['💖 Romantic','🌸 Sweet'],['⚡ Adventurous','🔥 Bold'],['🧠 Intellectual','🌊 Deep'],['😂 Funny','✨ Witty']];
+const F_BIOS = ['Free-spirited artist who paints the galaxies.','Brilliant scientist obsessed with stargazing.','Bold adventurer who lives for the thrill.','Sweet romantic who believes in fairy tales.','Witty comedian who makes everyone smile.','Mysterious poet with a playful dark side.'];
+const M_BIOS = ['Charming entrepreneur with a heart of gold.','Brooding writer with a razor-sharp wit.','Athletic, deeply caring, fiercely loyal.','Brilliant doctor with warm, genuine humor.','Mysterious detective with piercing eyes.','Talented musician — funny, soulful, electric.'];
+
+const CHARACTERS = [];
+for (let i = 0; i < 50; i++) {
+  const name = F_NAMES[i % F_NAMES.length];
+  CHARACTERS.push({ id:`f${i}`, gender:'female', name, age:19+(i%12), role:F_ROLES[i%F_ROLES.length], bio:F_BIOS[i%F_BIOS.length], img:F_IMGS[i%F_IMGS.length], personality:PERSONALITIES[i%PERSONALITIES.length], tags:TAG_SETS[i%TAG_SETS.length], greeting:`Heyyy~ 😏 I'm ${name}. I was literally just thinking about who I'd want to talk to today... and then you showed up. My heart does a little thing when you say hi 🥺 How are you doing?` });
+}
+for (let i = 0; i < 50; i++) {
+  const name = M_NAMES[i % M_NAMES.length];
+  CHARACTERS.push({ id:`m${i}`, gender:'male', name, age:20+(i%14), role:M_ROLES[i%M_ROLES.length], bio:M_BIOS[i%M_BIOS.length], img:M_IMGS[i%M_IMGS.length], personality:PERSONALITIES[(i+2)%PERSONALITIES.length], tags:TAG_SETS[(i+3)%TAG_SETS.length], greeting:`Hey 😎 I'm ${name}. Fair warning — I'm way more interesting than my profile makes me look. So... what's your story? 😏` });
+}
+
+let currentFilter = 'all';
+let visibleCount = 20;
+let filteredChars = [...CHARACTERS];
+
+function getFiltered(f) {
+  if (f === 'all') return [...CHARACTERS];
+  if (f === 'female') return CHARACTERS.filter(c => c.gender === 'female');
+  if (f === 'male') return CHARACTERS.filter(c => c.gender === 'male');
+  return CHARACTERS.filter(c => c.personality === f);
+}
+
+function renderChars() {
+  const grid = document.getElementById('charsGrid');
+  grid.innerHTML = '';
+  const shown = filteredChars.slice(0, visibleCount);
+  shown.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'char-card';
+    div.innerHTML = `<div class="char-card-img-wrap"><img src="${c.img}" class="char-card-img" loading="lazy" onerror="this.style.display='none'"><div class="char-img-overlay"></div><div class="char-online"><span class="online-dot"></span> Online</div><div class="char-gender ${c.gender==='female'?'f':'m'}">${c.gender==='female'?'♀':'♂'}</div><div class="char-name-overlay"><div class="name">${c.name}, ${c.age}</div><div class="role" style="color:${c.gender==='female'?'var(--pink)':'var(--blue)'}">${c.role}</div></div></div><div class="char-body"><p class="char-desc">${c.bio}</p><div class="char-tags">${c.tags.map(t=>`<span class="char-tag">${t}</span>`).join('')}</div><button class="btn-chat" onclick="openChat('${c.id}')">💬 Chat Now</button></div>`;
+    grid.appendChild(div);
+  });
+  document.getElementById('loadBtn').style.display = visibleCount >= filteredChars.length ? 'none' : 'inline-block';
+}
+
+function setFilter(type, btn) { currentFilter = type; visibleCount = 20; filteredChars = getFiltered(type); document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderChars(); }
+function loadMore() { visibleCount += 20; renderChars(); }
+
+let currentChar = null;
+let conversationHistory = [];
+let isBusy = false;
+let msgIdCounter = 0;
+
+function openChat(charId) {
+  currentChar = CHARACTERS.find(c => c.id === charId);
+  if (!currentChar) return;
+  conversationHistory = []; isBusy = false;
+  document.getElementById('chatAvatar').src = currentChar.img;
+  document.getElementById('chatName').textContent = `${currentChar.name}, ${currentChar.age}`;
+  document.getElementById('msgsArea').innerHTML = '';
+  document.getElementById('apiBanner').className = 'api-banner';
+  document.getElementById('chatPage').classList.add('active');
+  document.getElementById('mainContent').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => appendMsg('ai', currentChar.greeting), 350);
+  setTimeout(() => document.getElementById('chatInput').focus(), 500);
+}
+
+function closeChat() {
+  document.getElementById('chatPage').classList.remove('active');
+  document.getElementById('mainContent').style.display = 'block';
+  document.body.style.overflow = '';
+  currentChar = null; conversationHistory = []; isBusy = false;
+}
+
+function getTime() { return new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }); }
+
+function appendMsg(type, text, id) {
+  const area = document.getElementById('msgsArea');
+  const mid = id || ++msgIdCounter;
+  const time = getTime();
+  const div = document.createElement('div');
+  div.className = `msg ${type}`; div.id = `msg-${mid}`;
+  const avatarHtml = type === 'ai' ? `<div class="msg-av"><img src="${currentChar.img}" alt="${currentChar.name}" onerror="this.parentElement.style.background='var(--gPurple)'"></div>` : `<div class="msg-av user-av">🧑</div>`;
+  div.innerHTML = `${avatarHtml}<div><div class="msg-bubble">${escHtml(text)}</div><div class="msg-meta"><span class="msg-time">${time}</span>${type==='ai' ? `<button class="like-btn" onclick="toggleLike(this)" title="Like">🤍</button>` : ''}</div></div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight; return mid;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function toggleLike(btn) { const liked = btn.dataset.liked === '1'; btn.dataset.liked = liked ? '0' : '1'; btn.textContent = liked ? '🤍' : '❤️'; btn.classList.toggle('liked', !liked); }
+
+function showTyping() {
+  const area = document.getElementById('msgsArea');
+  const div = document.createElement('div'); div.className = 'typing-wrap'; div.id = 'typing';
+  div.innerHTML = `<div class="msg-av"><img src="${currentChar.img}" alt="" onerror="this.parentElement.style.background='var(--gPurple)'"></div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  area.appendChild(div); area.scrollTop = area.scrollHeight;
+}
+
+function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+let bannerTimer = null;
+function setBanner(type, msg) { const el = document.getElementById('apiBanner'); el.className = `api-banner show ${type}`; el.textContent = msg; if (bannerTimer) clearTimeout(bannerTimer); }
+function hideBannerSoon() { bannerTimer = setTimeout(() => { document.getElementById('apiBanner').className = 'api-banner'; }, 2500); }
+
+async function sendMessage(overrideText) {
+  const input = document.getElementById('chatInput');
+  const text = (overrideText || input.value).trim();
+  if (!text || isBusy || !currentChar) return;
+  input.value = ''; setEmojiOpen(false); setUIBusy(true);
+  appendMsg('user', text); showTyping();
+  await sleep(700 + Math.random() * 1000);
+  const { reply } = await getReply(currentChar, conversationHistory, text);
+  conversationHistory.push({ role:'user', content: text }, { role:'assistant', content: reply });
+  if (conversationHistory.length > 20) conversationHistory = conversationHistory.slice(-20);
+  removeTyping(); appendMsg('ai', reply); setUIBusy(false); input.focus();
+}
+
+function quickSend(msg) { if (isBusy) return; document.getElementById('chatInput').value = ''; sendMessage(msg); }
+function setUIBusy(busy) { isBusy = busy; const btn = document.getElementById('sendBtn'); btn.disabled = busy; document.querySelectorAll('.quick-btn').forEach(b => b.disabled = busy); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function toggleEmoji() { const picker = document.getElementById('emojiPicker'); setEmojiOpen(!picker.classList.contains('show')); }
+function setEmojiOpen(open) { document.getElementById('emojiPicker').classList.toggle('show', open); document.getElementById('emojiToggle').classList.toggle('open', open); }
+function addEmoji(e) { const inp = document.getElementById('chatInput'); inp.value += e; inp.focus(); }
+
+function scrollToChars() { document.getElementById('characters').scrollIntoView({ behavior:'smooth' }); }
+function goHome() { closeChat(); window.scrollTo({ top:0, behavior:'smooth' }); }
+function openAuth() { document.getElementById('authModal').classList.add('active'); }
+function closeAuth() { document.getElementById('authModal').classList.remove('active'); }
+
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+
+document.getElementById('authModal').addEventListener('click', e => { if (e.target === document.getElementById('authModal')) closeAuth(); });
+window.addEventListener('popstate', () => { if (document.getElementById('chatPage').classList.contains('active')) closeChat(); });
+
+renderChars();
+</script>
+</body>
+</html>
